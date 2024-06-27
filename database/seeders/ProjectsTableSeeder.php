@@ -20,7 +20,7 @@ class ProjectsTableSeeder extends Seeder
             $newProject = new Project();
             $newProject->name = $faker->sentence(2);
             $newProject->description = $faker->text(200);
-            $newProject->programming_languages = $faker->randomElement(['JS', 'PYTHON', 'PHP', 'JAVA']);
+            // $newProject->programming_languages = $faker->randomElement(['JS', 'PYTHON', 'PHP', 'JAVA']);
             $newProject->slug = Str::slug($newProject->name);
             $newProject->save();
         }

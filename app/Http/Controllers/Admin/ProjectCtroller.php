@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\Project;
+use App\Models\Technology;
 use App\Models\Type;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -28,7 +29,8 @@ class ProjectCtroller extends Controller
      */
     public function create()
     {
-        return view('admin.projects.create');
+        $technologies = Technology::all();
+        return view('admin.projects.create', compact('technologies'));
     }
 
     /**
@@ -40,9 +42,13 @@ class ProjectCtroller extends Controller
         // dd($data);
         $newProject = new Project();
         $newProject->fill($data);
+        $newProject->slug = Str::slug($request->name);
         $newProject->save();
 
-        return redirect()->route('admin.projects.index');
+        if($request->has('technologies')) {
+            $newProject->technologys()->attach($request->technologies);
+        }
+        return redirect()->route('admin.projects.show', $newProject->slug);
     }
 
     /**
@@ -50,7 +56,8 @@ class ProjectCtroller extends Controller
      */
     public function show(Project $project)
     {
-        return view('admin.projects.show', compact('project'));
+        $technologies = Technology::all();
+        return view('admin.projects.show', compact('project', 'technologies'));
     }
 
     /**
@@ -63,7 +70,9 @@ class ProjectCtroller extends Controller
         if(!$project) {
             abort(404);
         }
-        return view('admin.projects.edit', compact('project', 'types'));
+
+        $technologies = Technology::all();
+        return view('admin.projects.edit', compact('project', 'types', 'technologies'));
     }
 
     /**
@@ -75,6 +84,9 @@ class ProjectCtroller extends Controller
         $data = $request->all();
         $data['slug'] = Str::slug($data['name']);
         $project->update($data);
+
+        $project->technologys()->sync($request->technologies);
+
         return redirect()->route('admin.projects.show', ['project'=> $project->slug]);
     }
 
@@ -83,7 +95,8 @@ class ProjectCtroller extends Controller
      */
     public function destroy(Project $project)
     {
+        $project->technologys()->detach();
         $project->delete();
-        return redirect()->route('admin.projects.index');
+        return redirect()->route('admin.projects.index')->with('message', 'The project '. $project->name . ' is delete!');
     }
 }

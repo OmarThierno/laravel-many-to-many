@@ -1,7 +1,7 @@
 @extends('layouts.my-admin')
-
 @section('content')
-  <div class="container">
+<div class="container">
+    @include('partials.session_message')
     <div class="d-flex justify-content-between align-items-center">
       <h1>Project</h1>
       <a href="{{route('admin.projects.create')}}" class="btn btn-primary">Created</a>
@@ -28,7 +28,6 @@
           <th scope="col">name</th>
           <th scope="col">Type</th>
           <th scope="col">description</th>
-          <th scope="col">programming_languages</th>
           <th scope="col">Action</th>
         </tr>
       </thead>

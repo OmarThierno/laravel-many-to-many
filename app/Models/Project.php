@@ -11,9 +11,13 @@ class Project extends Model
     use HasFactory;
     use SoftDeletes;
 
-    protected $fillable = ['name', 'description', 'programming_languages', 'slug', 'type_id'];
+    protected $fillable = ['name', 'description', 'slug', 'type_id'];
 
     public function type() {
         return $this->belongsTo(Type::class);
+    }
+
+    public function technologys() {
+        return $this->belongsToMany(Technology::class);
     }
 }

@@ -23,10 +23,7 @@ class UpdateProjectRequest extends FormRequest
     {
         return [
             'name'=> ['required'],
-            'description'=> ['min:10'],
-            'programming_languages'=> ['required'],
-            'slug'=> ['required'],
-
+            'description'=> ['nullable' ,'min:10'],
         ];
     }
 }

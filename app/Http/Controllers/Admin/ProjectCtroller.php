@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\Technology;
 use App\Models\Type;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class ProjectCtroller extends Controller
@@ -20,7 +21,9 @@ class ProjectCtroller extends Controller
     {
         $perPage = $request->per_page ? $request->per_page : 10;
         // $projects = Project::all();
-        $projects = Project::paginate($perPage);
+        $user = Auth::id();
+        // dd(Auth::user());
+        $projects = Project::where('user_id', $user)->paginate($perPage);
         return view('admin.projects.index', compact('projects'));
     }
 
@@ -38,8 +41,9 @@ class ProjectCtroller extends Controller
      */
     public function store(StoreProjectRequest $request)
     {
-        $data = $request->all();
-        // dd($data);
+        // $data = $request->all();
+        $data = $request->validated(); //solo le richieste validate
+        $data["user_id"] = Auth::id();
         $newProject = new Project();
         $newProject->fill($data);
         $newProject->slug = Str::slug($request->name);
@@ -56,6 +60,9 @@ class ProjectCtroller extends Controller
      */
     public function show(Project $project)
     {
+        if($project->user_id !== Auth::id()){
+            abort(403); // non serve mettere l'errore corretta, avolte possiamo fingere un'altro errore cosi da non fare capire la struttura del nostro database
+        }
         $technologies = Technology::all();
         return view('admin.projects.show', compact('project', 'technologies'));
     }
@@ -71,6 +78,9 @@ class ProjectCtroller extends Controller
             abort(404);
         }
 
+        if($project->user_id !== Auth::id()){
+            abort(403); 
+        }
         $technologies = Technology::all();
         return view('admin.projects.edit', compact('project', 'types', 'technologies'));
     }
@@ -81,6 +91,9 @@ class ProjectCtroller extends Controller
     public function update(UpdateProjectRequest $request, Project $project)
     {
         // dd($request->all());
+        if($project->user_id !== Auth::id()){
+            abort(403); 
+        }
         $data = $request->all();
         $data['slug'] = Str::slug($data['name']);
         $project->update($data);
@@ -95,6 +108,9 @@ class ProjectCtroller extends Controller
      */
     public function destroy(Project $project)
     {
+        if($project->user_id !== Auth::id()){
+            abort(403);
+        }
         $project->technologys()->detach();
         $project->delete();
         return redirect()->route('admin.projects.index')->with('message', 'The project '. $project->name . ' is delete!');

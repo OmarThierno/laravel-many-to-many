@@ -11,8 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
-            $table->unsignedBigInteger('user_id')->nullable()->after('name');
+        Schema::create('user_details', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->string('address');
+            $table->string('phone_number')->nullable();
+            $table->timestamps();
+
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
         });
     }
@@ -22,9 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
-            $table->dropForeign('projects_user_id_foreign');
-            $table->dropColumn('user_id');
-        });
+        Schema::dropIfExists('user_details');
     }
 };
